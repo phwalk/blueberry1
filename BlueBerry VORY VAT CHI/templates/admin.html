@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block title %}Управление каталогом — BlueBerry{% endblock %}
+{% block content %}
+<section class="shell admin-page reveal">
+  <p class="eyebrow">BlueBerry / Управление</p>
+  <h1>Каталог и статистика</h1>
+  <p class="admin-intro">Добавляйте позиции, проверяйте остатки и следите за активностью. Характеристики для новых товаров добавляются отдельно в карточке товара.</p>
+
+  <div class="stat-grid">
+    <article class="stat-card"><b>{{ stats.total_visits }}</b><span>Всего визитов</span></article>
+    <article class="stat-card"><b>{{ stats.unique_ips }}</b><span>Уникальных посетителей</span></article>
+    <article class="stat-card"><b>{{ stats.today_visits }}</b><span>Визитов сегодня</span></article>
+    <article class="stat-card"><b>{{ products|length }}</b><span>Товаров в каталоге</span></article>
+  </div>
+
+  <div class="admin-columns">
+    <article class="surface-card">
+      <h2>Добавить товар</h2>
+      <form class="form-stack" action="{{ url_for('admin') }}" method="post">
+        <input type="hidden" name="action" value="add">
+        <div class="admin-form-grid">
+          <label>Название на русском<input name="name_ru" required></label>
+          <label>Название на английском<input name="name_en" required></label>
+          <label>Название на армянском<input name="name_hy" required></label>
+          <label>Ключ категории<select name="category_key"><option value="phones">phones</option><option value="pcs">pcs</option><option value="gaming">gaming</option><option value="accessories">accessories</option></select></label>
+          <label>Категория RU<input name="category_ru" value="Телефоны" required></label>
+          <label>Категория EN<input name="category_en" value="Phones" required></label>
+          <label>Категория HY<input name="category_hy" value="Հեռախոսներ" required></label>
+          <label>Демо-цена, ֏<input name="price_value" type="number" value="199000" min="0" required></label>
+          <label>Остаток<input name="stock" type="number" value="10" min="0" required></label>
+          <label>Статус<select name="featured"><option value="0">Обычный</option><option value="1">Рекомендуемый</option></select></label>
+        </div>
+        <label>URL изображения<input name="image" type="url" placeholder="https://..." required></label>
+        <label>Описание на русском<textarea name="description_ru" required></textarea></label>
+        <label>Описание на английском<textarea name="description_en"></textarea></label>
+        <label>Описание на армянском<textarea name="description_hy"></textarea></label>
+        <button class="button button-dark" type="submit">Опубликовать товар</button>
+      </form>
+    </article>
+
+    <article class="surface-card">
+      <h2>Последние визиты</h2>
+      <div class="visit-list">
+        {% for row in stats.recent %}
+        <div><strong>{{ row.ip }}</strong><span>{{ row.path }} · {{ row.created_at }}</span></div>
+        {% else %}<p class="muted-copy">Данных пока нет.</p>{% endfor %}
+      </div>
+    </article>
+  </div>
+
+  <article class="surface-card catalog-manager">
+    <div class="card-heading"><h2>Товары</h2><span>{{ products|length }} позиций</span></div>
+    <div class="manage-list">
+      {% for product in products %}
+      <div class="manage-item">
+        <div><strong>{{ product.name_ru }}</strong><span>{{ product.category_ru }} · {{ product.price_text }} · остаток: {{ product.stock }}</span></div>
+        <form action="{{ url_for('admin') }}" method="post"><input type="hidden" name="action" value="delete"><input type="hidden" name="product_id" value="{{ product.id }}"><button class="delete-button" type="submit">Удалить</button></form>
+      </div>
+      {% endfor %}
+    </div>
+  </article>
+</section>
+{% endblock %}

@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}Личный кабинет — BlueBerry{% endblock %}
+{% block content %}
+<section class="shell account-page reveal">
+  <p class="eyebrow">BlueBerry / Аккаунт</p>
+  <h1>Личный кабинет</h1>
+  <div class="account-grid">
+    <article class="surface-card"><p class="label">Логин</p><strong>{{ user.username }}</strong><p class="label">Email</p><strong>{{ user.email }}</strong><p class="label">Роль</p><strong>{{ 'Администратор' if user.is_admin else 'Покупатель' }}</strong></article>
+    <article class="surface-card"><h2>Изменить пароль</h2><form class="form-stack" action="{{ url_for('change_password') }}" method="post"><label>Текущий пароль<input name="old_password" type="password" required></label><label>Новый пароль<input name="new_password" type="password" minlength="6" required></label><button class="button button-dark" type="submit">Сохранить</button></form></article>
+  </div>
+</section>
+{% endblock %}

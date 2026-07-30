@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 650" role="img" aria-labelledby="title desc">
+  <title id="title">BlueBerry product placeholder</title>
+  <desc id="desc">Нейтральная карточка товара BlueBerry</desc>
+  <rect width="800" height="650" fill="#ebece7"/>
+  <rect x="245" y="112" width="310" height="370" rx="26" fill="#f9f9f6" stroke="#cfd2cb" stroke-width="8"/>
+  <circle cx="400" cy="278" r="68" fill="none" stroke="#3158bc" stroke-width="16"/>
+  <circle cx="400" cy="278" r="31" fill="#3158bc"/>
+  <path d="M330 384h140" stroke="#b1b5ac" stroke-width="14" stroke-linecap="round"/>
+  <text x="400" y="555" text-anchor="middle" fill="#5f645c" font-family="Arial, sans-serif" font-size="25" font-weight="700" letter-spacing="4">BLUEBERRY</text>
+</svg>

@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% block title %}{{ product.name_ru }} — BlueBerry{% endblock %}
+{% block content %}
+<div class="shell product-page">
+  <nav class="breadcrumbs" aria-label="Навигация">
+    <a href="{{ url_for('home') }}">Каталог</a><span>/</span><a href="{{ url_for('home', category=product.category_key) }}">{{ product.category_ru }}</a><span>/</span><span>{{ product.name_ru }}</span>
+  </nav>
+
+  <section class="product-view reveal">
+    <div class="product-gallery">
+      <div class="product-image-stage">
+        <img src="{{ product.image }}" alt="{{ product.name_ru }}" onerror="this.onerror=null;this.src='{{ url_for('static', filename='product-placeholder.svg') }}';">
+      </div>
+      <p class="product-image-note">Изображение товара</p>
+    </div>
+
+    <div class="product-summary">
+      <p class="eyebrow">{{ product.category_ru }}</p>
+      <h1>{{ product.name_ru }}</h1>
+      <p class="product-lead">{{ facts.summary }}</p>
+
+      <dl class="feature-line">
+        {% for label, value in facts.highlights %}
+        <div><dt>{{ label }}</dt><dd>{{ value }}</dd></div>
+        {% endfor %}
+      </dl>
+
+      <div class="buy-box">
+        <div><p class="price">{{ product.price_text }}</p><p class="price-note">Демонстрационная цена</p></div>
+        <span class="availability {% if product.stock > 0 %}in-stock{% else %}out-of-stock{% endif %}">{% if product.stock > 0 %}В наличии: {{ product.stock }} шт.{% else %}Нет в наличии{% endif %}</span>
+      </div>
+      <div class="buy-actions">
+        <form action="{{ url_for('add_to_cart') }}" method="post">
+          <input type="hidden" name="lang" value="{{ lang }}">
+          <input type="hidden" name="product_id" value="{{ product.id }}">
+          <input type="hidden" name="next" value="{{ request.full_path }}">
+          <button class="button button-dark" type="submit">Добавить в корзину</button>
+        </form>
+        <form action="{{ url_for('toggle_favorite') }}" method="post">
+          <input type="hidden" name="product_id" value="{{ product.id }}">
+          <input type="hidden" name="next" value="{{ request.full_path }}">
+          <button class="button button-outline favorite-detail{% if product.id|string in favorites %} is-active{% endif %}" type="submit">{% if product.id|string in favorites %}В избранном{% else %}В избранное{% endif %}</button>
+        </form>
+      </div>
+      <p class="product-disclaimer">Перед покупкой менеджер подтвердит точную конфигурацию, цвет, цену и наличие.</p>
+    </div>
+  </section>
+
+  <section class="specification-section reveal">
+    <div class="section-heading"><p class="eyebrow">Информация о товаре</p><h2>Характеристики</h2></div>
+    <dl class="spec-table">
+      {% for label, value in facts.specs %}
+      <div><dt>{{ label }}</dt><dd>{{ value }}</dd></div>
+      {% endfor %}
+    </dl>
+    {% if facts.source_url %}
+    <a class="source-link" href="{{ facts.source_url }}" target="_blank" rel="noopener noreferrer">Источник: {{ facts.source_name }} ↗</a>
+    {% endif %}
+  </section>
+
+  <section class="recommendations reveal">
+    <div class="section-heading"><p class="eyebrow">Подборка BlueBerry</p><h2>Похожие товары</h2></div>
+    <div class="recommendation-grid">
+      {% for item in similar %}
+      <a class="recommendation-card" href="{{ url_for('product_detail', product_id=item.id) }}">
+        <img src="{{ item.image }}" alt="{{ item.name_ru }}" loading="lazy" onerror="this.onerror=null;this.src='{{ url_for('static', filename='product-placeholder.svg') }}';"><span>{{ item.category_ru }}</span><strong>{{ item.name_ru }}</strong><small>{{ item.price_text }}</small>
+      </a>
+      {% endfor %}
+    </div>
+  </section>
+
+  <section class="recommendations reveal">
+    <div class="section-heading"><p class="eyebrow">Сравнить перед покупкой</p><h2>Товары с похожими функциями</h2></div>
+    <div class="recommendation-grid">
+      {% for item in alternatives %}
+      <a class="recommendation-card" href="{{ url_for('product_detail', product_id=item.id) }}">
+        <img src="{{ item.image }}" alt="{{ item.name_ru }}" loading="lazy" onerror="this.onerror=null;this.src='{{ url_for('static', filename='product-placeholder.svg') }}';"><span>{{ item.category_ru }}</span><strong>{{ item.name_ru }}</strong><small>{{ item.price_text }}</small>
+      </a>
+      {% endfor %}
+    </div>
+  </section>
+</div>
+{% endblock %}

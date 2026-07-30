@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f7f7f5">
+  <title>{% block title %}BlueBerry — электроника{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  {% block extra_head %}{% endblock %}
+</head>
+<body data-theme="paper">
+  <header class="site-header">
+    <div class="shell header-inner">
+      <a class="brand" href="{{ url_for('home') }}" aria-label="BlueBerry — на главную">
+        <span class="brand-mark" aria-hidden="true"></span>
+        <span>BlueBerry</span>
+      </a>
+
+      <nav class="site-nav" aria-label="Основная навигация">
+        <a href="{{ url_for('home') }}">Каталог</a>
+        <a href="{{ url_for('iphone') }}">iPhone 17 Pro Max</a>
+        {% if user and user.is_admin %}<a href="{{ url_for('admin') }}">Управление</a>{% endif %}
+      </nav>
+
+      <div class="header-actions">
+        <span class="cart-status" title="Товаров в корзине">Корзина <b>{{ cart_count|default(0) }}</b></span>
+        <label class="theme-control">
+          <span class="sr-only">Оформление сайта</span>
+          <select id="theme-picker" aria-label="Оформление сайта">
+            <option value="paper">Светлая</option>
+            <option value="midnight">Графит</option>
+            <option value="blueberry">BlueBerry</option>
+          </select>
+        </label>
+        {% if user %}
+          <a class="account-link" href="{{ url_for('profile') }}">{{ user.username }}</a>
+          <a class="quiet-link" href="{{ url_for('logout') }}">Выйти</a>
+        {% else %}
+          <button class="quiet-link button-reset" type="button" data-open-auth>Войти</button>
+        {% endif %}
+      </div>
+    </div>
+  </header>
+
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="site-footer">
+    <div class="shell footer-inner">
+      <span>© 2026 BlueBerry</span>
+      <span>Демонстрационный каталог · цены требуют уточнения</span>
+    </div>
+  </footer>
+
+  {% if not user %}
+  <dialog class="auth-dialog" id="auth-dialog" aria-labelledby="auth-dialog-title">
+    <button class="dialog-close" type="button" data-close-auth aria-label="Закрыть">×</button>
+    <section id="login-panel">
+      <p class="eyebrow">Личный кабинет</p>
+      <h2 id="auth-dialog-title">Вход</h2>
+      <form class="form-stack" action="{{ url_for('login') }}" method="post">
+        <label>Логин<input name="username" autocomplete="username" required></label>
+        <label>Пароль<input name="password" type="password" autocomplete="current-password" required></label>
+        <button class="button button-dark" type="submit">Войти</button>
+      </form>
+      <p class="dialog-switch">Нет аккаунта? <button class="text-button" type="button" data-show-register>Зарегистрироваться</button></p>
+    </section>
+    <section id="register-panel" hidden>
+      <p class="eyebrow">Личный кабинет</p>
+      <h2>Регистрация</h2>
+      <form class="form-stack" action="{{ url_for('register') }}" method="post">
+        <label>Логин<input name="username" autocomplete="username" required></label>
+        <label>Email<input name="email" type="email" autocomplete="email" required></label>
+        <label>Пароль<input name="password" type="password" autocomplete="new-password" minlength="6" required></label>
+        <button class="button button-dark" type="submit">Создать аккаунт</button>
+      </form>
+      <p class="dialog-switch">Уже есть аккаунт? <button class="text-button" type="button" data-show-login>Войти</button></p>
+    </section>
+  </dialog>
+  {% endif %}
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script>
+    (function () {
+      const body = document.body;
+      const picker = document.getElementById('theme-picker');
+      const savedTheme = localStorage.getItem('blueberry-theme');
+      if (savedTheme && ['paper', 'midnight', 'blueberry'].includes(savedTheme)) {
+        body.dataset.theme = savedTheme;
+        picker.value = savedTheme;
+      }
+      picker.addEventListener('change', function () {
+        body.dataset.theme = picker.value;
+        localStorage.setItem('blueberry-theme', picker.value);
+      });
+
+      const dialog = document.getElementById('auth-dialog');
+      const loginPanel = document.getElementById('login-panel');
+      const registerPanel = document.getElementById('register-panel');
+      document.querySelectorAll('[data-open-auth]').forEach(function (button) {
+        button.addEventListener('click', function () { dialog.showModal(); });
+      });
+      document.querySelectorAll('[data-close-auth]').forEach(function (button) {
+        button.addEventListener('click', function () { dialog.close(); });
+      });
+      document.querySelectorAll('[data-show-register]').forEach(function (button) {
+        button.addEventListener('click', function () { loginPanel.hidden = true; registerPanel.hidden = false; });
+      });
+      document.querySelectorAll('[data-show-login]').forEach(function (button) {
+        button.addEventListener('click', function () { registerPanel.hidden = true; loginPanel.hidden = false; });
+      });
+      if (dialog) {
+        dialog.addEventListener('click', function (event) {
+          if (event.target === dialog) dialog.close();
+        });
+      }
+
+      const toast = document.getElementById('toast');
+      const message = {{ (message|default(''))|tojson }};
+      if (message) {
+        toast.textContent = message;
+        requestAnimationFrame(function () { toast.classList.add('is-visible'); });
+        setTimeout(function () { toast.classList.remove('is-visible'); }, 2600);
+      }
+
+      body.classList.add('js');
+      const revealItems = document.querySelectorAll('.reveal');
+      if ('IntersectionObserver' in window) {
+        const observer = new IntersectionObserver(function (entries) {
+          entries.forEach(function (entry) {
+            if (entry.isIntersecting) {
+              entry.target.classList.add('is-visible');
+              observer.unobserve(entry.target);
+            }
+          });
+        }, { threshold: 0.12 });
+        revealItems.forEach(function (item) { observer.observe(item); });
+      } else {
+        revealItems.forEach(function (item) { item.classList.add('is-visible'); });
+      }
+    }());
+  </script>
+  {% block extra_scripts %}{% endblock %}
+</body>
+</html>

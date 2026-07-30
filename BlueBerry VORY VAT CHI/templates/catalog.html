@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block title %}Каталог электроники — BlueBerry{% endblock %}
+{% block content %}
+<section class="catalog-hero shell reveal">
+  <div>
+    <p class="eyebrow">BlueBerry / Каталог</p>
+    <h1>Техника без визуального шума.</h1>
+    <p class="hero-copy">Смартфоны, компьютеры, игры и аксессуары. У каждого товара — отдельная страница с характеристиками и подходящими альтернативами.</p>
+  </div>
+  <a class="hero-feature" href="{{ url_for('iphone') }}">
+    <span>Новинка каталога</span>
+    <strong>iPhone 17 Pro Max</strong>
+    <small>Смотреть характеристики →</small>
+  </a>
+</section>
+
+<section class="shell catalog-section">
+  <form class="catalog-tools" method="get" action="{{ url_for('home') }}">
+    <label class="search-field">
+      <span class="sr-only">Поиск</span>
+      <input name="search" value="{{ search }}" placeholder="Поиск по каталогу">
+    </label>
+    <input type="hidden" name="category" value="{{ category }}">
+    <button class="button button-dark" type="submit">Найти</button>
+  </form>
+
+  <nav class="category-nav" aria-label="Категории товаров">
+    <a class="{% if category == 'all' %}is-active{% endif %}" href="{{ url_for('home', category='all', search=search) }}">Все</a>
+    <a class="{% if category == 'phones' %}is-active{% endif %}" href="{{ url_for('home', category='phones', search=search) }}">Телефоны</a>
+    <a class="{% if category == 'pcs' %}is-active{% endif %}" href="{{ url_for('home', category='pcs', search=search) }}">Компьютеры</a>
+    <a class="{% if category == 'gaming' %}is-active{% endif %}" href="{{ url_for('home', category='gaming', search=search) }}">Игры</a>
+    <a class="{% if category == 'accessories' %}is-active{% endif %}" href="{{ url_for('home', category='accessories', search=search) }}">Аксессуары</a>
+  </nav>
+
+  <div class="product-grid">
+    {% for product in products %}
+    <article class="product-card reveal">
+      <a class="product-media" href="{{ url_for('product_detail', product_id=product.id) }}" aria-label="Открыть {{ product['name_ru'] }}">
+        <img src="{{ product.image }}" alt="{{ product['name_ru'] }}" loading="lazy" onerror="this.onerror=null;this.src='{{ url_for('static', filename='product-placeholder.svg') }}';">
+      </a>
+      <div class="product-card-body">
+        <p class="product-category">{{ product.category_ru }}</p>
+        <a class="product-title" href="{{ url_for('product_detail', product_id=product.id) }}">{{ product['name_ru'] }}</a>
+        <p class="product-description">{{ product.description_ru }}</p>
+        <div class="price-row">
+          <span class="price">{{ product.price_text }}</span>
+          <span class="price-note">демо-цена</span>
+        </div>
+        <div class="product-actions">
+          <a class="button button-outline" href="{{ url_for('product_detail', product_id=product.id) }}">Подробнее</a>
+          <form action="{{ url_for('add_to_cart') }}" method="post">
+            <input type="hidden" name="lang" value="{{ lang }}">
+            <input type="hidden" name="product_id" value="{{ product.id }}">
+            <button class="icon-button" type="submit" aria-label="Добавить {{ product['name_ru'] }} в корзину">+</button>
+          </form>
+          <form action="{{ url_for('toggle_favorite') }}" method="post">
+            <input type="hidden" name="product_id" value="{{ product.id }}">
+            <button class="icon-button favorite-button{% if product.id in favorites|map(attribute='id')|list %} is-active{% endif %}" type="submit" aria-label="Добавить в избранное">♡</button>
+          </form>
+        </div>
+      </div>
+    </article>
+    {% else %}
+    <div class="empty-state">По этому запросу ничего не найдено. Попробуйте изменить поиск или категорию.</div>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}
